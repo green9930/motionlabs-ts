@@ -1,6 +1,17 @@
 import styled from 'styled-components';
 import { calcRem, colors } from '@styles/GlobalStyle';
 
+const GraphType = () => {
+  return (
+    <GraphTypeContainer>
+      <LineType />
+      <span>활동 주기</span>
+      <BarType />
+      <span>활동 기간 시작일 </span>
+    </GraphTypeContainer>
+  );
+};
+
 const GraphTypeContainer = styled.div`
   display: flex;
   margin-bottom: ${calcRem(20)};
@@ -33,15 +44,8 @@ const BarType = styled.div`
   background: ${colors.chartBlack};
 `;
 
-const GraphType = () => {
-  return (
-    <GraphTypeContainer>
-      <LineType />
-      <span>활동 주기</span>
-      <BarType />
-      <span>활동 기간 시작일 </span>
-    </GraphTypeContainer>
-  );
-};
+GraphTypeContainer.displayName = 'GraphTypeContainer';
+LineType.displayName = 'LineType';
+BarType.displayName = 'BarType';
 
 export default GraphType;

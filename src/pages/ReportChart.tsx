@@ -1,9 +1,9 @@
 import { Fragment, useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { calcRem, colors } from '@styles/GlobalStyle';
+import { UserData } from 'types';
 import { getUsersData } from '@api/users';
 import GraphType from '@containers/GraphType';
-import { UserData } from 'types';
+import { calcRem, colors } from '@styles/GlobalStyle';
 
 const ReportChart = () => {
   const [newUserReport, setNewUserReport] = useState<UserData[]>([]);
@@ -19,21 +19,22 @@ const ReportChart = () => {
         const json = await response.json();
         const userData: UserData[] = json.data;
 
+        // periodLength : 바 그래프 높이
         const userPeriod = userData.map((user) => user.period);
         const maxPeriod = Math.max(...userPeriod);
         const periodLength = userPeriod.map((period) =>
           Math.round((period / maxPeriod) * 100)
         );
 
+        // cycleX, cyclxY : 라인 그래프 point 좌표
+        const cycleX = userData.map((_, index) => {
+          return (WIDTH * (index + 1)) / (userData.length + 1);
+        });
         const userCycle = userData.map((user) => user.cycle);
         const MaxCycle = Math.max(...userCycle);
         const cycleY = userCycle.map(
           (cycle) => HEIGHT - Math.round((cycle / MaxCycle) * 100)
         );
-
-        const cycleX = userData.map((_, index) => {
-          return (WIDTH * (index + 1)) / (userData.length + 1);
-        });
 
         const newUserData = userData.map((user, index) => {
           user.periodLength = periodLength[index];
@@ -44,7 +45,6 @@ const ReportChart = () => {
 
         setNewUserReport(newUserData);
 
-        // console.log(newUserData);
         setInit(true);
       } catch (error) {
         console.error(error);
@@ -88,10 +88,10 @@ const ReportChart = () => {
                 })}
               </svg>
               {newUserReport.map((data) => {
-                const { cycle, cycleX, cycleY } = data;
+                const { startDate, cycle, cycleX, cycleY } = data;
                 return (
                   <LineCycle
-                    key={`line-${cycle}`}
+                    key={`line-${startDate}`}
                     top={cycleY - 30}
                     left={cycleX - 12}
                     cycle={cycle}
@@ -103,17 +103,18 @@ const ReportChart = () => {
             </LineGraphContainer>
             <BarGraphContainer>
               {newUserReport.map((user) => {
+                const { startDate, period, periodLength } = user;
                 return (
-                  <BarContainer key={user.startDate}>
+                  <BarContainer key={`bar-${startDate}`}>
                     <div className="bar-period">
-                      <span>{user.period}일</span>
+                      <span>{period}일</span>
                     </div>
-                    <BarContent periodLength={user.periodLength} />
+                    <StyledBar periodLength={periodLength} />
                     <div className="bar-start-date">
                       <span>
-                        {user.startDate[5]}
-                        {user.startDate[6]}/{user.startDate[8]}
-                        {user.startDate[9]}
+                        {startDate[5]}
+                        {startDate[6]}/{startDate[8]}
+                        {startDate[9]}
                       </span>
                     </div>
                   </BarContainer>
@@ -188,11 +189,19 @@ const BarContainer = styled.div`
   }
 `;
 
-const BarContent = styled.div<{ periodLength: number }>`
+const StyledBar = styled.div<{ periodLength: number }>`
   width: ${calcRem(30)};
   height: ${({ periodLength }) => calcRem(periodLength)};
   border-radius: ${calcRem(10)};
   background: ${colors.chartTypeBlack5};
 `;
+
+UserReportContainer.displayName = 'UserReportContainer';
+ChartContainer.displayName = 'ChartContainer';
+LineGraphContainer.displayName = 'LineGraphContainer';
+LineCycle.displayName = 'LineCycle';
+BarGraphContainer.displayName = 'BarGraphContainer';
+BarContainer.displayName = 'BarContainer';
+StyledBar.displayName = 'StyledBar';
 
 export default ReportChart;
